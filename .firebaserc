@@ -1,6 +1,7 @@
 {
   "projects": {
-    "shopping": "e-learning-e552d"
+    "shopping": "e-learning-e552d",
+    "shop2": "e-learning-e552d"
   },
   "targets": {},
   "etags": {}
