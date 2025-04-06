@@ -52,11 +52,7 @@ const Shopping = () => {
   const handleAdd = (item) => {
     const exists = cart.find((i) => i.id === item.id);
     if (exists) {
-      setCart(
-        cart.map((i) =>
-          i.id === item.id ? { ...i, quantity: i.quantity + 1 } : i
-        )
-      );
+      setCart(cart.map((i) => i.id === item.id ? { ...i, quantity: i.quantity + 1 } : i));
     } else {
       setCart([...cart, { ...item, quantity: 1 }]);
     }
@@ -68,68 +64,16 @@ const Shopping = () => {
     if (exists.quantity === 1) {
       setCart(cart.filter((i) => i.id !== item.id));
     } else {
-      setCart(
-        cart.map((i) =>
-          i.id === item.id ? { ...i, quantity: i.quantity - 1 } : i
-        )
-      );
+      setCart(cart.map((i) => i.id === item.id ? { ...i, quantity: i.quantity - 1 } : i));
     }
   };
 
-  const handleEditProduct = (product) => {
-    setEditProduct(product);
-  };
-
-  const handleDeleteProduct = async (id) => {
-    const confirmDelete = confirm("Are you sure you want to delete this product?");
-    if (!confirmDelete) return;
-    try {
-      await deleteDoc(doc(db, "products", id));
-      fetchProducts();
-      alert("🗑️ Product deleted successfully.");
-    } catch (err) {
-      console.error(err);
-      alert("❌ Failed to delete product.");
-    }
-  };
-
-  const handleProductFormSubmit = async (e) => {
-    e.preventDefault();
-    const form = e.target;
-    const newProduct = {
-      title: form.title.value,
-      price: parseFloat(form.price.value),
-      description: form.description.value,
-      category: form.category.value,
-      image: form.image.value,
-    };
-    try {
-      if (editProduct) {
-        await updateDoc(doc(db, "products", editProduct.id), newProduct);
-        alert("✅ Product updated!");
-        setEditProduct(null);
-      } else {
-        await addDoc(collection(db, "products"), newProduct);
-        alert("✅ Product added!");
-      }
-      form.reset();
-      fetchProducts();
-    } catch (err) {
-      console.error(err);
-      alert("❌ Failed to save product.");
-    }
-  };
-
-  const total = cart.reduce(
-    (acc, item) => acc + item.price * item.quantity,
-    0
-  ).toFixed(2);
-  const filtered = products.filter((p) =>
-    p.title.toLowerCase().includes(search.toLowerCase())
-  );
+  const total = cart.reduce((acc, item) => acc + item.price * item.quantity, 0).toFixed(2);
+  const filtered = products.filter((p) => p.title.toLowerCase().includes(search.toLowerCase()));
 
   return (
     <div className="p-6 w-full max-w-[1600px] mx-auto">
+      {/* Header & Search */}
       <div className="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
         <h1 className="text-3xl font-bold">
           🛍 <span className="text-primary">Shopping</span>
@@ -149,124 +93,86 @@ const Shopping = () => {
           </button>
         </div>
       </div>
-
+  
+      {/* Admin Add Product */}
       {isAdmin && (
         <form
-          onSubmit={handleProductFormSubmit}
+          onSubmit={async (e) => {
+            e.preventDefault();
+            const newProduct = {
+              title: e.target.title.value,
+              price: parseFloat(e.target.price.value),
+              description: e.target.description.value,
+              category: e.target.category.value,
+              image: e.target.image.value,
+            };
+            await addDoc(collection(db, "products"), newProduct);
+            fetchProducts();
+            e.target.reset();
+          }}
           className="bg-base-200 p-6 rounded-xl shadow mb-10"
         >
-          <h2 className="text-lg font-semibold mb-4">
-            {editProduct ? "✏️ Edit Product" : "🛠 Add New Product"}
-          </h2>
+          <h2 className="text-lg font-semibold mb-4">🛠 Add New Product</h2>
           <div className="grid md:grid-cols-3 gap-4">
-            <input
-              name="title"
-              placeholder="Title"
-              className="input input-bordered"
-              defaultValue={editProduct?.title || ""}
-              required
-            />
-            <input
-              name="price"
-              placeholder="Price"
-              type="number"
-              className="input input-bordered"
-              defaultValue={editProduct?.price || ""}
-              required
-            />
-            <input
-              name="category"
-              placeholder="Category"
-              className="input input-bordered"
-              defaultValue={editProduct?.category || ""}
-              required
-            />
-            <input
-              name="image"
-              placeholder="Image URL"
-              className="input input-bordered md:col-span-2"
-              defaultValue={editProduct?.image || ""}
-              required
-            />
-            <textarea
-              name="description"
-              placeholder="Description"
-              className="textarea textarea-bordered md:col-span-3"
-              defaultValue={editProduct?.description || ""}
-              required
-            />
+            <input name="title" placeholder="Title" className="input input-bordered" required />
+            <input name="price" placeholder="Price" type="number" className="input input-bordered" required />
+            <input name="category" placeholder="Category" className="input input-bordered" required />
+            <input name="image" placeholder="Image URL" className="input input-bordered md:col-span-2" required />
+            <textarea name="description" placeholder="Description" className="textarea textarea-bordered md:col-span-3" required />
           </div>
-          <div className="flex gap-2 mt-4">
-            <button type="submit" className="btn btn-success w-full">
-              {editProduct ? "Update Product" : "➕ Add Product"}
-            </button>
-            {editProduct && (
-              <button
-                type="button"
-                onClick={() => setEditProduct(null)}
-                className="btn btn-outline w-full"
-              >
-                Cancel
-              </button>
-            )}
-          </div>
+          <button type="submit" className="btn btn-success mt-4 w-full">
+            ➕ Add Product
+          </button>
         </form>
       )}
-
+  
+      {/* Products Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-8 mb-12">
         {filtered.map((item) => (
-          <div
-            key={item.id}
-            className="card bg-base-100 shadow-xl hover:shadow-2xl transition"
-          >
+          <div key={item.id} className="card bg-base-100 shadow-xl hover:shadow-2xl transition">
             <figure className="px-4 pt-4">
-              <img
-                src={item.image}
-                alt={item.title}
-                className="h-40 object-contain"
-              />
+              <img src={item.image} alt={item.title} className="h-40 object-contain" />
             </figure>
             <div className="card-body items-center text-center">
               <h3 className="card-title">{item.title}</h3>
-              <p className="text-sm text-gray-500 line-clamp-2">
-                {item.description}
-              </p>
+              <p className="text-sm text-gray-500 line-clamp-2">{item.description}</p>
               <p className="font-bold text-primary">Price: ${item.price}</p>
-              <button
-                className="btn btn-sm btn-primary mt-2"
-                onClick={() => handleAdd(item)}
-              >
+              <button className="btn btn-sm btn-primary mt-2" onClick={() => handleAdd(item)}>
                 Add
               </button>
-              {isAdmin && (
-                <div className="flex gap-2 mt-2">
-                  <button
-                    className="btn btn-sm btn-warning"
-                    onClick={() => handleEditProduct(item)}
-                  >
-                    ✏️
-                  </button>
-                  <button
-                    className="btn btn-sm btn-error"
-                    onClick={() => handleDeleteProduct(item.id)}
-                  >
-                    🗑️
-                  </button>
-                </div>
-              )}
             </div>
           </div>
         ))}
       </div>
-
+  
+      {/* Explore Section */}
+      <div className="mb-10">
+        <h2 className="text-2xl font-semibold mb-6">✨ Explore our recommendations</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+          {filtered.slice(0, 3).map((item) => (
+            <div key={item.id} className="card bg-base-100 shadow">
+              <figure className="px-4 pt-4">
+                <img src={item.image} alt={item.title} className="h-28 object-contain" />
+              </figure>
+              <div className="card-body items-center text-center">
+                <h3 className="card-title text-base">{item.title}</h3>
+                <p className="text-sm text-gray-500">{item.category}</p>
+                <p className="text-primary font-bold">${item.price}</p>
+                <button className="btn btn-sm btn-outline" onClick={() => handleAdd(item)}>
+                  Add
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+  
+      {/* Cart Drawer */}
       {showCart && (
         <div className="fixed top-0 right-0 w-full sm:w-[400px] h-full bg-base-200 shadow-lg p-6 z-50 overflow-y-auto">
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-xl font-bold">🛍 Cart</h2>
-            <button
-              onClick={() => setShowCart(false)}
-              className="btn btn-sm btn-error"
-            >
+            <button onClick={() => setShowCart(false)} className="btn btn-sm btn-error">
               Close
             </button>
           </div>
@@ -282,18 +188,8 @@ const Shopping = () => {
                       <p className="text-sm text-gray-500">x{item.quantity}</p>
                     </div>
                     <div className="flex items-center gap-2">
-                      <button
-                        className="btn btn-xs"
-                        onClick={() => handleDecrease(item)}
-                      >
-                        -
-                      </button>
-                      <button
-                        className="btn btn-xs"
-                        onClick={() => handleAdd(item)}
-                      >
-                        +
-                      </button>
+                      <button className="btn btn-xs" onClick={() => handleDecrease(item)}>-</button>
+                      <button className="btn btn-xs" onClick={() => handleAdd(item)}>+</button>
                     </div>
                   </li>
                 ))}
@@ -306,6 +202,7 @@ const Shopping = () => {
       )}
     </div>
   );
+  
 };
 
 export default Shopping;
