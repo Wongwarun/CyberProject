@@ -8,6 +8,7 @@ import {
 import { useNavigate } from "react-router-dom";
 import { signOut } from "firebase/auth";
 import { auth } from "../Firebase";
+import Logo from '../images/Logo1.png';
 
 const Sidebar = () => {
   const navigate = useNavigate();
@@ -25,7 +26,7 @@ const Sidebar = () => {
       className="text-3xl font-extrabold text-gray-800 cursor-pointer tracking-wide"
       onClick={() => navigate("/shopping")}
     >
-      🛍️ MyShop
+    <img src={Logo} alt="Shopping Logo" className="h-20 w-auto" />  
     </div>
 
     {/* Nav + Logout (ชิดขวา) */}

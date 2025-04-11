@@ -9,6 +9,7 @@ import {
   doc,
   getDoc,
 } from "firebase/firestore";
+import Logo from '../images/Logo2.png';
 
 const Shopping = () => {
   const [products, setProducts] = useState([]);
@@ -125,15 +126,18 @@ const Shopping = () => {
     0
   ).toFixed(2);
   const filtered = products.filter((p) =>
-    p.title.toLowerCase().includes(search.toLowerCase())
+    p.title.toLowerCase().includes(search.toLowerCase()) ||
+    p.category.toLowerCase().includes(search.toLowerCase())
   );
+  
 
   return (
     <div className="p-6 w-full max-w-[1600px] mx-auto">
       <div className="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
-        <h1 className="text-3xl font-bold">
-          🛍 <span className="text-primary">Shopping</span>
-        </h1>
+      <h1 className="text-3xl font-bold flex items-center gap-2">
+  <span className="text-primary">Shopping</span>
+</h1>
+
         <div className="flex items-center gap-2">
           <input
             type="text"
